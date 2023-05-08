@@ -1,0 +1,71 @@
+- name: Task name
+  stat:
+    path: /root/private.key
+  register: private_key
+
+- name: Task name
+  stat:
+    path: /root/public.key
+  register: public_key
+
+- name: Run the tests
+  docker_container:
+    detach: false
+    name: "ssv_node_op_key"
+    image: "bloxstaking/ssv-node:latest"
+    command: /go/bin/ssvnode generate-operator-keys
+  register: docker_container_output
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+#could not register prometheus collector 
+- name: Show test output
+  debug:
+    msg: "{{ docker_container_output.container.Output }}"
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: save output to file to process
+  copy:
+    content: "{{ docker_container_output.container.Output }}"
+    dest: /tmp/scrap.txt
+    remote_src: yes
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: Remove the test container
+  docker_container:
+    state: absent
+    name: "ssv_node_op_key"
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: clean txt file
+  shell: sed -i '/could not register prometheus collector/d' /tmp/scrap.txt 
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: remove first 105 chars from each line
+  shell: cat /tmp/scrap.txt | cut -c106-100000000000 > /tmp/scrap_2.txt
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: remove leading whitespace on lines
+  shell: sed "s/^[ \t]*//" -i /tmp/scrap_2.txt
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: save public key
+  shell: sed '2q;d' /tmp/scrap_2.txt > /root/private.key
+  become: true
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: save private ket
+  shell: sed '1q;d' /tmp/scrap_2.txt > /root/public.key
+  become: true
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: Remove file (delete file)
+  ansible.builtin.file:
+    path: /tmp/scrap.txt
+    state: absent
+  when: public_key.stat.exists == False and private_key.stat.exists == False
+
+- name: Remove file (delete file)
+  ansible.builtin.file:
+    path: /tmp/scrap_2.txt
+    state: absent
+  when: public_key.stat.exists == False and private_key.stat.exists == False

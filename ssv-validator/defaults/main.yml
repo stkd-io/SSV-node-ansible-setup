@@ -1,0 +1,5 @@
+---
+# defaults file for ssv-validator
+  RegistryContractAddr: "0x687fb596F3892904F879118e2113e1EEe8746C2E"
+  network_name: "prater"
+  data_path: "/var/lib/"

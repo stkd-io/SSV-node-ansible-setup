@@ -1,0 +1,45 @@
+  - name: Ensure group ssv exists
+    ansible.builtin.group:
+      name: "ssv"
+      state: present
+
+  - name: create docker user account
+    user:
+      name: "docker"
+      group: "ssv"
+      shell: /sbin/nologin
+      state: present
+
+  - name: Creates application storage directory
+    file:
+      path: "{{ data_path }}/ssv"
+      state: directory
+      owner: "root"
+      group: "ssv"
+      mode: "755"
+
+  - name: Create directory for config file
+    file:
+      path: "/etc/ssv"
+      state: directory
+      owner: "root"
+      group: "ssv"
+      mode: "755"
+
+  - name: Copy start.sh on to the server
+    ansible.builtin.template:
+      src: start.sh.j2
+      dest: "/root/start.sh"
+      owner: root
+      group: ssv
+      mode: u+rwx
+    become: true
+
+  - name: Copy update.sh on to the server
+    copy:
+      src: update.sh
+      dest: "/root/update.sh"
+      owner: root
+      group: ssv
+      mode: u+rwx
+    become: true

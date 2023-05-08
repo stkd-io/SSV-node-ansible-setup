@@ -1,0 +1,7 @@
+---
+# tasks file for ssv-validator
+  - import_tasks: 001-setup_env.yml
+  - import_tasks: 002-install.yml
+  - import_tasks: 003-generate-keys.yml
+  - import_tasks: 004-config-file.yml
+

@@ -1,0 +1,15 @@
+  - name: Display the JSON file content
+    shell: cat /root/private.key
+    register: result
+
+  - name: save the Json data to a Variable as a Fact
+    set_fact:
+      PrivateKey: "{{ result.stdout | from_json }}"
+
+  - name: Copy config.yaml on to the server
+    ansible.builtin.template:
+      src: config.yaml.j2
+      dest: "/etc/ssv/config.yaml"
+      owner: root
+      group: ssv
+      mode: '0644'

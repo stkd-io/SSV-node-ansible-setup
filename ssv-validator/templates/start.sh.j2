@@ -1,0 +1,6 @@
+#!/bin/bash
+docker run -d --restart unless-stopped --name=ssv_node -e \
+CONFIG_PATH=/etc/config.yaml -p 13001:13001 -p 12001:12001/udp \
+-v /etc/config.yaml:/config.yaml -v /{{ data_path }}/vss:/data -it \
+'bloxstaking/ssv-node:latest' make BUILD_PATH=/go/bin/ssvnode start-node \ 
+&& docker logs ssv_node --follow
